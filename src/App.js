@@ -1,10 +1,14 @@
+import axios from "axios";
 import { useState } from "react";
 
 function App() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const onSubmit = () => {
-    console.log(title, body);
+    axios.post("http://localhost:3001/posts", {
+      title,
+      body,
+    });
   };
 
   return (
