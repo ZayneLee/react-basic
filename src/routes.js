@@ -18,7 +18,7 @@ const routes = [
     component: CreatePage,
   },
   {
-    paht: "/blogs/edit",
+    paht: "/blogs/:id/edit",
     component: EditPage,
   },
   {

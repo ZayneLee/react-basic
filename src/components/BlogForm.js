@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
 
-const BlogForm = () => {
+const BlogForm = ({ editing }) => {
   const history = useHistory();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -19,7 +19,7 @@ const BlogForm = () => {
   };
   return (
     <div>
-      <h1>Create a blog post</h1>
+      <h1>{editing ? "Edit" : "Create"} a blog post</h1>
       <div className="mb-3">
         <label className="form-label">Title</label>
         <input
@@ -46,6 +46,13 @@ const BlogForm = () => {
       </button>
     </div>
   );
+};
+BlogForm.propTypes = {
+  editing: Boolean,
+};
+
+BlogForm.defaultProps = {
+  editing: false,
 };
 
 export default BlogForm;
