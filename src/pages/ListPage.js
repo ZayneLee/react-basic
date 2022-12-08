@@ -40,7 +40,7 @@ const ListPage = () => {
           key={post.id}
           title={post.title}
           onClick={() => {
-            history.push("/blogs/edit");
+            history.push(`/blogs/${post.id}`);
           }}
         >
           <div>

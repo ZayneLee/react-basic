@@ -2,6 +2,7 @@ import CreatePage from "./pages/CreatePage";
 import EditPage from "./pages/EditPage";
 import HomePage from "./pages/HomePage";
 import ListPage from "./pages/ListPage";
+import ShowPage from "./pages/ShowPage";
 
 const routes = [
   {
@@ -19,6 +20,10 @@ const routes = [
   {
     paht: "/blogs/edit",
     component: EditPage,
+  },
+  {
+    paht: "/blogs/:id",
+    component: ShowPage,
   },
 ];
 

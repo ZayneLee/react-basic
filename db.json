@@ -1,19 +1,10 @@
 {
   "posts": [
     {
-      "title": "345345",
-      "body": "345345345",
-      "id": 1
-    },
-    {
-      "title": "345345",
-      "body": "34534534",
-      "id": 2
-    },
-    {
-      "title": "1234",
-      "body": "1234",
-      "id": 3
+      "title": "sdfsdfsdf",
+      "body": "sdfsfsdf",
+      "createdAt": 1670492338411,
+      "id": 6
     }
   ]
 }
