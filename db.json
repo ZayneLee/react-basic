@@ -1,10 +1,16 @@
 {
   "posts": [
     {
-      "title": "35345",
-      "body": "345345345",
+      "title": "yes",
+      "body": "yes12",
       "createdAt": 1670507091416,
       "id": 1
+    },
+    {
+      "title": "red",
+      "body": "red",
+      "createdAt": 1670577874934,
+      "id": 2
     }
   ]
 }

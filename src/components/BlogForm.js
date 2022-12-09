@@ -1,21 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
+import { bool } from "prop-types";
 
 const BlogForm = ({ editing }) => {
   const history = useHistory();
   const [title, setTitle] = useState("");
+  const [originalTitle, setOriginalTitle] = useState("");
   const [body, setBody] = useState("");
-  const onSubmit = () => {
-    axios
-      .post("http://localhost:3001/posts", {
-        title,
-        body,
-        createdAt: Date.now(),
-      })
-      .then(() => {
-        history.push("/blogs");
+  const [originalBody, setOriginalBody] = useState("");
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (editing) {
+      axios.get(`http://localhost:3001/posts/${id}`).then((res) => {
+        setTitle(res.data.title);
+        setOriginalTitle(res.data.title);
+        setBody(res.data.body);
+        setOriginalBody(res.data.body);
       });
+    }
+  }, [id, editing]);
+
+  const isEdited = () => {
+    return title !== originalTitle || body !== originalBody;
+  };
+
+  const onSubmit = () => {
+    if (editing) {
+      axios
+        .patch(`http://localhost:3001/posts/${id}`, {
+          title,
+          body,
+        })
+        .then((res) => {
+          history.push(`/blogs/${id}`);
+        });
+    } else {
+      axios
+        .post("http://localhost:3001/posts", {
+          title,
+          body,
+          createdAt: Date.now(),
+        })
+        .then(() => {
+          history.push("/blogs");
+        });
+    }
   };
   return (
     <div>
@@ -38,17 +69,21 @@ const BlogForm = ({ editing }) => {
           onChange={(e) => {
             setBody(e.target.value);
           }}
-          rows="20"
+          rows="10"
         />
       </div>
-      <button className="btn btn-primary" onClick={onSubmit}>
-        Post
+      <button
+        className="btn btn-primary"
+        onClick={onSubmit}
+        disabled={editing && !isEdited()}
+      >
+        {editing ? "Edit" : "Post"}
       </button>
     </div>
   );
 };
 BlogForm.propTypes = {
-  editing: Boolean,
+  editing: bool,
 };
 
 BlogForm.defaultProps = {
