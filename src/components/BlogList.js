@@ -4,17 +4,33 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { bool } from "prop-types";
+import Pagination from "./Pagination";
 
 const BlogList = ({ isAdmin }) => {
   const history = useHistory();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const getPosts = () => {
-    axios.get("http://localhost:3001/posts").then((res) => {
-      setPosts(res.data);
-      setLoading(false);
-    });
+  const getPosts = (page = 1) => {
+    let params = {
+      _page: page,
+      _limit: 5,
+      _sort: "id",
+      _order: "desc",
+    };
+
+    if (!isAdmin) {
+      params = { ...params, publish: true };
+    }
+
+    axios
+      .get(`http://localhost:3001/posts`, {
+        params,
+      })
+      .then((res) => {
+        setPosts(res.data);
+        setLoading(false);
+      });
   };
   const deleteBlog = (e, id) => {
     e.stopPropagation();
@@ -34,9 +50,9 @@ const BlogList = ({ isAdmin }) => {
   if (posts.length === 0) {
     return <div>No blog posts found</div>;
   }
-  return posts
-    .filter((post) => isAdmin || post.publish)
-    .map((post) => {
+
+  const renderBlogList = () => {
+    return posts.map((post) => {
       return (
         <Card
           key={post.id}
@@ -58,6 +74,14 @@ const BlogList = ({ isAdmin }) => {
         </Card>
       );
     });
+  };
+
+  return (
+    <div>
+      {renderBlogList()}
+      <Pagination currentPage={1} numberOfPages={5} />
+    </div>
+  );
 };
 
 BlogList.propTypes = {

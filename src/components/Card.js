@@ -1,4 +1,4 @@
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 const Card = ({ title, children, onClick }) => {
   return (
     <div className="card mb-3 cursor-pointer" onClick={onClick}>
@@ -11,9 +11,9 @@ const Card = ({ title, children, onClick }) => {
 };
 
 Card.propTypes = {
-  title: PropTypes.string.isRequired,
-  children: PropTypes.element,
-  onClick: PropTypes.func,
+  title: propTypes.string.isRequired,
+  children: propTypes.element,
+  onClick: propTypes.func,
 };
 
 Card.defaultProps = {
