@@ -1,13 +1,16 @@
 import Card from "../components/Card";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { bool } from "prop-types";
 import Pagination from "./Pagination";
 
 const BlogList = ({ isAdmin }) => {
   const history = useHistory();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const pageParam = params.get("page");
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,39 +22,47 @@ const BlogList = ({ isAdmin }) => {
     setNumberOfPages(Math.ceil(numberOfPosts / limit));
   }, [numberOfPosts]);
 
-  const getPosts = (page = 1) => {
-    setCurrentPage(page);
-    let params = {
-      _page: page,
-      _limit: limit,
-      _sort: "id",
-      _order: "desc",
-    };
-
-    if (!isAdmin) {
-      params = { ...params, publish: true };
-    }
-
-    axios
-      .get(`http://localhost:3001/posts`, {
-        params,
-      })
-      .then((res) => {
-        setNumberOfPosts(res.headers["x-total-count"]);
-        setPosts(res.data);
-        setLoading(false);
-      });
+  const onClickPageButton = (page) => {
+    history.push(`${location.pathname}?page=${page}`);
+    getPosts(page);
   };
+  const getPosts = useCallback(
+    (page = 1) => {
+      let params = {
+        _page: page,
+        _limit: limit,
+        _sort: "id",
+        _order: "desc",
+      };
+
+      if (!isAdmin) {
+        params = { ...params, publish: true };
+      }
+
+      axios
+        .get(`http://localhost:3001/posts`, {
+          params,
+        })
+        .then((res) => {
+          setNumberOfPosts(res.headers["x-total-count"]);
+          setPosts(res.data);
+          setLoading(false);
+        });
+    },
+    [isAdmin]
+  );
+
+  useEffect(() => {
+    setCurrentPage(parseInt(pageParam) || 1);
+    getPosts(parseInt(pageParam) || 1);
+  }, [pageParam, getPosts]);
+
   const deleteBlog = (e, id) => {
     e.stopPropagation();
     axios.delete(`http://localhost:3001/posts/${id}`).then(() => {
       setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id));
     });
   };
-
-  useEffect(() => {
-    getPosts();
-  }, []);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -67,9 +78,7 @@ const BlogList = ({ isAdmin }) => {
         <Card
           key={post.id}
           title={post.title}
-          onClick={() => {
-            history.push(`/blogs/${post.id}`);
-          }}
+          onClick={() => history.push(`/blogs/${post.id}`)}
         >
           {isAdmin ? (
             <div>
@@ -93,7 +102,7 @@ const BlogList = ({ isAdmin }) => {
         <Pagination
           currentPage={currentPage}
           numberOfPages={numberOfPages}
-          onClick={getPosts}
+          onClick={onClickPageButton}
         />
       )}
     </div>
