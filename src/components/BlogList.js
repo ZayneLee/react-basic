@@ -3,8 +3,8 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import { bool } from "prop-types";
 import Pagination from "./Pagination";
+import propTypes from "prop-types";
 
 const BlogList = ({ isAdmin }) => {
   const history = useHistory();
@@ -16,7 +16,8 @@ const BlogList = ({ isAdmin }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [numberOfPosts, setNumberOfPosts] = useState(0);
   const [numberOfPages, setNumberOfPages] = useState(0);
-  const limit = 1;
+  const [searchText, setSearchText] = useState("");
+  const limit = 5;
 
   useEffect(() => {
     setNumberOfPages(Math.ceil(numberOfPosts / limit));
@@ -24,8 +25,10 @@ const BlogList = ({ isAdmin }) => {
 
   const onClickPageButton = (page) => {
     history.push(`${location.pathname}?page=${page}`);
+    setCurrentPage(page);
     getPosts(page);
   };
+
   const getPosts = useCallback(
     (page = 1) => {
       let params = {
@@ -33,6 +36,7 @@ const BlogList = ({ isAdmin }) => {
         _limit: limit,
         _sort: "id",
         _order: "desc",
+        title_like: searchText,
       };
 
       if (!isAdmin) {
@@ -49,13 +53,13 @@ const BlogList = ({ isAdmin }) => {
           setLoading(false);
         });
     },
-    [isAdmin]
+    [isAdmin, searchText]
   );
 
   useEffect(() => {
     setCurrentPage(parseInt(pageParam) || 1);
     getPosts(parseInt(pageParam) || 1);
-  }, [pageParam, getPosts]);
+  }, []);
 
   const deleteBlog = (e, id) => {
     e.stopPropagation();
@@ -66,10 +70,6 @@ const BlogList = ({ isAdmin }) => {
 
   if (loading) {
     return <LoadingSpinner />;
-  }
-
-  if (posts.length === 0) {
-    return <div>No blog posts found</div>;
   }
 
   const renderBlogList = () => {
@@ -95,22 +95,45 @@ const BlogList = ({ isAdmin }) => {
     });
   };
 
+  const onSearch = (e) => {
+    if (e.key === "Enter") {
+      history.push(`${location.pathname}?page=1`);
+      setCurrentPage(1);
+      getPosts(1);
+    }
+  };
+
   return (
     <div>
-      {renderBlogList()}
-      {numberOfPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          numberOfPages={numberOfPages}
-          onClick={onClickPageButton}
-        />
+      <input
+        value={searchText}
+        type="text"
+        placeholder="Search.."
+        className="form-control"
+        onChange={(e) => setSearchText(e.target.value)}
+        onKeyUp={onSearch}
+      />
+      <hr />
+      {posts.length === 0 ? (
+        <div>No blog posts found</div>
+      ) : (
+        <>
+          {renderBlogList()}
+          {numberOfPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              numberOfPages={numberOfPages}
+              onClick={onClickPageButton}
+            />
+          )}
+        </>
       )}
     </div>
   );
 };
 
 BlogList.propTypes = {
-  isAdmin: bool,
+  isAdmin: propTypes.bool,
 };
 
 BlogList.defaultProps = {
