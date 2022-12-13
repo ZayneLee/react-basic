@@ -5,6 +5,7 @@ import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import Pagination from "./Pagination";
 import propTypes from "prop-types";
+import Toast from "./Toast";
 
 const BlogList = ({ isAdmin }) => {
   const history = useHistory();
@@ -105,6 +106,12 @@ const BlogList = ({ isAdmin }) => {
 
   return (
     <div>
+      <Toast
+        toasts={[
+          { text: "error", type: "danger" },
+          { text: "success", type: "success" },
+        ]}
+      />
       <input
         value={searchText}
         type="text"
