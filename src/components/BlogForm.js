@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useHistory, useParams } from "react-router-dom";
 import propTypes from "prop-types";
-
+import { v4 as uuidv4 } from "uuid";
+import Toast from "../components/Toast";
 const BlogForm = ({ editing }) => {
   const history = useHistory();
   const { id } = useParams();
@@ -14,6 +15,9 @@ const BlogForm = ({ editing }) => {
   const [originalPublish, setOriginalPublish] = useState(false);
   const [titleError, setTitleError] = useState(false);
   const [bodyError, setBodyError] = useState(false);
+  // const [toasts, setToasts] = useState([]);
+  const [, setToastRerender] = useState(false);
+  const toasts = useRef([]);
 
   useEffect(() => {
     if (editing) {
@@ -62,6 +66,29 @@ const BlogForm = ({ editing }) => {
     return validated;
   };
 
+  const deleteToast = (id) => {
+    const filteredToasts = toasts.current.filter((toast) => {
+      return toast.id !== id;
+    });
+    toasts.current = filteredToasts;
+    setToastRerender((prev) => !prev);
+    // setToasts(filteredToasts);
+  };
+
+  const addToast = (toast) => {
+    const id = uuidv4();
+    const toastWithId = {
+      ...toast,
+      id,
+    };
+    toasts.current = [...toasts.current, toastWithId];
+    setToastRerender((prev) => !prev);
+    // setToasts((prev) => [...prev, toastWithId]);
+    setTimeout(() => {
+      deleteToast(id);
+    }, 5000);
+  };
+
   const onSubmit = () => {
     setTitleError(false);
     setBodyError(false);
@@ -85,13 +112,18 @@ const BlogForm = ({ editing }) => {
             createdAt: Date.now(),
           })
           .then(() => {
-            history.push("/admin");
+            addToast({
+              type: "success",
+              text: "Successfully created!",
+            });
+            // history.push("/admin");
           });
       }
     }
   };
   return (
     <div>
+      <Toast toasts={toasts.current} deleteToast={deleteToast} />
       <h1>{editing ? "Edit" : "Create"} a blog post</h1>
       <div className="mb-3">
         <label className="form-label">Title</label>
