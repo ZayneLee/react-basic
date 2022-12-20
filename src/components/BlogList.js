@@ -18,6 +18,7 @@ const BlogList = ({ isAdmin }) => {
   const [numberOfPosts, setNumberOfPosts] = useState(0);
   const [numberOfPages, setNumberOfPages] = useState(0);
   const [searchText, setSearchText] = useState("");
+  const [error, setError] = useState("");
   const { addToast } = useToast();
   // const [, setToastRerender] = useState(false);
   // const toasts = useRef([]);
@@ -55,6 +56,14 @@ const BlogList = ({ isAdmin }) => {
           setNumberOfPosts(res.headers["x-total-count"]);
           setPosts(res.data);
           setLoading(false);
+        })
+        .catch((e) => {
+          setLoading(false);
+          setError("Something went wrong in database");
+          addToast({
+            text: "Something went wrong",
+            type: "danger",
+          });
         });
     },
     [isAdmin, searchText]
@@ -64,31 +73,6 @@ const BlogList = ({ isAdmin }) => {
     setCurrentPage(parseInt(pageParam) || 1);
     getPosts(parseInt(pageParam) || 1);
   }, []);
-
-  // const deleteToast = (id) => {
-  //   const filteredToasts = toasts.current.filter((toast) => {
-  //     return toast.id !== id;
-  //   });
-
-  //   // setToasts(filteredToasts);
-  //   toasts.current = filteredToasts;
-  //   setToastRerender((prev) => !prev);
-  // };
-
-  // const addToast = (toast) => {
-  //   const id = uuidv4();
-  //   const toastWithId = {
-  //     ...toast,
-  //     id,
-  //   };
-  //   toasts.current = [...toasts.current, toastWithId];
-  //   setToastRerender((prev) => !prev);
-
-  //   // setToasts((prev) => [...prev, toastWithId]);
-  //   setTimeout(() => {
-  //     deleteToast(id);
-  //   }, 5000);
-  // };
 
   const deleteBlog = (e, id) => {
     e.stopPropagation();
@@ -135,6 +119,9 @@ const BlogList = ({ isAdmin }) => {
       getPosts(1);
     }
   };
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div>
