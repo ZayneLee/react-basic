@@ -3,12 +3,27 @@ import NavBar from "./components/NavBar";
 import Toast from "./components/Toast";
 import routes from "./routes";
 import useToast from "./hooks/toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ProtectedRoute from "./ProtectedRoute";
+import { useEffect, useState } from "react";
+import LoadingSpinner from "./components/LoadingSpinner";
+import { login } from "./store/authSlice";
 
 function App() {
   const toasts = useSelector((state) => state.toast.toasts);
   const { deleteToast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (localStorage.getItem("isLoggedIn")) {
+      dispatch(login());
+    }
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
   return (
     <Router>
       <NavBar />

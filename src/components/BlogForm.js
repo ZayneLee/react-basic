@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useHistory, useParams } from "react-router-dom";
 import propTypes from "prop-types";
+import useToast from "../hooks/toast";
+import LoadingSpinner from "./LoadingSpinner";
 
-const BlogForm = ({ editing, addToast }) => {
+const BlogForm = ({ editing }) => {
   const history = useHistory();
   const { id } = useParams();
   const [title, setTitle] = useState("");
@@ -14,20 +16,33 @@ const BlogForm = ({ editing, addToast }) => {
   const [originalPublish, setOriginalPublish] = useState(false);
   const [titleError, setTitleError] = useState(false);
   const [bodyError, setBodyError] = useState(false);
-  // const [toasts, setToasts] = useState([]);
-  // const [, setToastRerender] = useState(false);
-  // const toasts = useRef([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { addToast } = useToast();
 
   useEffect(() => {
     if (editing) {
-      axios.get(`http://localhost:3001/posts/${id}`).then((res) => {
-        setTitle(res.data.title);
-        setOriginalTitle(res.data.title);
-        setBody(res.data.body);
-        setOriginalBody(res.data.body);
-        setPublish(res.data.publish);
-        setOriginalPublish(res.data.publish);
-      });
+      axios
+        .get(`http://localhost:3001/posts/${id}`)
+        .then((res) => {
+          setTitle(res.data.title);
+          setOriginalTitle(res.data.title);
+          setBody(res.data.body);
+          setOriginalBody(res.data.body);
+          setPublish(res.data.publish);
+          setOriginalPublish(res.data.publish);
+          setLoading(false);
+        })
+        .catch((e) => {
+          setError("something went wrong in db");
+          addToast({
+            type: "danger",
+            text: "something went wrong in db",
+          });
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
     }
   }, [id, editing]);
 
@@ -65,29 +80,6 @@ const BlogForm = ({ editing, addToast }) => {
     return validated;
   };
 
-  // const deleteToast = (id) => {
-  //   const filteredToasts = toasts.current.filter((toast) => {
-  //     return toast.id !== id;
-  //   });
-  //   toasts.current = filteredToasts;
-  //   setToastRerender((prev) => !prev);
-  //   // setToasts(filteredToasts);
-  // };
-
-  // const addToast = (toast) => {
-  //   const id = uuidv4();
-  //   const toastWithId = {
-  //     ...toast,
-  //     id,
-  //   };
-  //   toasts.current = [...toasts.current, toastWithId];
-  //   setToastRerender((prev) => !prev);
-  //   // setToasts((prev) => [...prev, toastWithId]);
-  //   setTimeout(() => {
-  //     deleteToast(id, toasts, setToastRerender);
-  //   }, 5000);
-  // };
-
   const onSubmit = () => {
     setTitleError(false);
     setBodyError(false);
@@ -101,6 +93,12 @@ const BlogForm = ({ editing, addToast }) => {
           })
           .then((res) => {
             history.push(`/blogs/${id}`);
+          })
+          .catch((e) => {
+            addToast({
+              type: "danger",
+              text: "We could not update blog",
+            });
           });
       } else {
         axios
@@ -116,10 +114,23 @@ const BlogForm = ({ editing, addToast }) => {
               text: "Successfully created!",
             });
             history.push("/admin");
+          })
+          .catch((e) => {
+            addToast({
+              type: "danger",
+              text: "We could not create blog",
+            });
           });
       }
     }
   };
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
   return (
     <div>
       <h1>{editing ? "Edit" : "Create"} a blog post</h1>
